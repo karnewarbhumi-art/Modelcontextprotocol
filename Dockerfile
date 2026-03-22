@@ -1,32 +1,17 @@
-# Dockerfile
+# Use the official Python image from the Docker Hub
+FROM python:3.9-slim
 
-# Use the official Golang image as a base image
-FROM golang:1.20-alpine AS builder
-
-# Set the Current Working Directory inside the container
+# Set the working directory
 WORKDIR /app
 
-# Copy the Go Modules manifests
-COPY go.mod .
-COPY go.sum .
+# Copy the requirements.txt file
+COPY requirements.txt ./
 
-# Download all dependencies. Dependency management is enforced when using the Go modules
-RUN go mod download
+# Install the dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the source code into the container
+# Copy the entire project
 COPY . .
 
-# Build the Go app
-RUN go build -o weather-agent ./...
-
-# Start a new stage from scratch
-FROM alpine:latest
-
-# Set the Current Working Directory inside the container
-WORKDIR /root/
-
-# Copy the Pre-built binary file from the previous stage
-COPY --from=builder /app/weather-agent .
-
-# Command to run the executable
-CMD ["./weather-agent"]
+# Command to run the application
+CMD ["python", "app.py"]
